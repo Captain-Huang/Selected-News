@@ -1,0 +1,1 @@
+"""News API application package."""
