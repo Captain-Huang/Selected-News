@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,5 +28,15 @@ final dioProvider = Provider<Dio>((Ref ref) {
       receiveTimeout: const Duration(seconds: 20),
     ),
   );
+  if (!kIsWeb && dio.httpClientAdapter is IOHttpClientAdapter) {
+    final IOHttpClientAdapter adapter =
+        dio.httpClientAdapter as IOHttpClientAdapter;
+    adapter.createHttpClient = () {
+      final HttpClient client = HttpClient();
+      // Use direct connection for local API, avoid broken system proxy settings.
+      client.findProxy = (Uri _) => 'DIRECT';
+      return client;
+    };
+  }
   return dio;
 });
